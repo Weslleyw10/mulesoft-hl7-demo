@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:hl7="http://www.mulesoft.org/schema/mule/hl7" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:mllp="http://www.mulesoft.org/schema/mule/mllp"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mllp http://www.mulesoft.org/schema/mule/mllp/current/mule-mllp.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/hl7 http://www.mulesoft.org/schema/mule/hl7/current/mule-hl7.xsd">
+	<mllp:mllp-listener-config name="HL7_MLLP_Mllp_listener_config" doc:name="HL7 MLLP Mllp listener config" doc:id="58a885dc-a408-4972-baf0-c174080e1aaa" >
+		<mllp:mllp-listener-connection host="localhost" port="30500" />
+	</mllp:mllp-listener-config>
+	<hl7:config name="HL7_EDI_Config" doc:name="HL7 EDI Config" doc:id="d1772cd6-a521-49d4-aa3e-f1a5c2380730" >
+		<hl7:schemas >
+			<hl7:schema value="/hl7lax/v2_5/ADT_A01.esl" />
+		</hl7:schemas>
+	</hl7:config>
+	<mllp:request-config name="HL7_MLLP_Request_config" doc:name="HL7 MLLP Request config" doc:id="2f33a7a2-8b80-4420-90b3-01a8e3cb158d" >
+		<mllp:mllp-requester-connection host="localhost" port="1234" />
+	</mllp:request-config>
+	<flow name="hl7-demoFlow" doc:id="5d0f2553-60a9-4b29-82f7-61ca3d96f819" >
+		<mllp:mllp-listener doc:name=":30500" doc:id="57951dc8-d59e-44ae-8939-e319fb86389d" config-ref="HL7_MLLP_Mllp_listener_config"/>
+		<logger level="INFO" doc:name="MESSAGE RECEIVED" doc:id="022577e7-70fe-4f8c-8435-f89ebd7253e3" message="MESSAGE RECEIVED: #[payload]"/>
+		<hl7:read doc:name="Read" doc:id="871949a2-bbd4-4d7c-9c3e-c8080b23ffc6" config-ref="HL7_EDI_Config"/>
+		<logger level="INFO" doc:name="AFTER READ" doc:id="63e843fb-478c-42a7-aba6-f8eccc62a96b" message="AFTER READ: #[payload]"/>
+		<ee:transform doc:name="toJSON" doc:id="d3f31053-fbb3-4332-903e-005d1cfc56ad" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="hl7Message" doc:id="4e628cd1-cbfb-4903-ab41-6def943cbf51" variableName="hl7Message"/>
+		<logger level="INFO" doc:name="MESSAGE READ" doc:id="dc9306d2-04ba-4aa7-bc2a-45b2ec1012c2" message="MESSAGE READ: #[payload]" />
+		<!-- [STUDIO:"Raise error"]<raise-error doc:name="Raise error" doc:id="7f9ecc4d-2638-4b8b-997c-552974094872" type="INTERNAL:MOCKED_ERROR"/> [STUDIO] -->
+		<hl7:write doc:name="Write" doc:id="d3b356d9-7e99-4101-b1d9-ea0f1ff000d9" config-ref="HL7_EDI_Config"/>
+		<mllp:send doc:name="Send" doc:id="8ca45462-5a71-443c-87c2-8d238e5eb2cb" config-ref="HL7_MLLP_Request_config"/>
+		<logger level="INFO" doc:name="MESSAGE SENT" doc:id="6a6b7d71-df04-4da8-8368-32694e827658" message="MESSAGE SENT: #[payload]"/>
+		<ee:transform doc:name="ACK Success" doc:id="6f78b088-6398-43cd-a89e-acecd90f6dec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json  
+---
+{
+  Errors: [],
+  Delimiters: payload.Delimiters,
+  Id: "ACK",
+  Name: "ACK",
+  MSH: payload.MSH - 'MSH-09' ++ {
+    "MSH-09": {
+      "MSG-03": "ACK",
+      "MSG-02": payload.MSH."MSH-09"."MSG-02",
+      "MSG-01": "ACK"
+    }
+  },
+  ACK: payload.ACK - 'MSH' ++ {
+    MSH: payload.MSH - 'MSH-09' ++ {
+      "MSH-09": {
+        "MSG-03": "ACK",
+        "MSG-02": payload.MSH."MSH-09"."MSG-02",
+        "MSG-01": "ACK"
+      }
+    }
+  },
+  Data: {
+    ACK: {
+      MSH: payload.MSH - 'MSH-09' ++ {
+        "MSH-09": {
+          "MSG-03": "ACK",
+          "MSG-02": payload.MSH."MSH-09"."MSG-02",
+          "MSG-01": "ACK"
+        }
+      },
+      MSA: payload.ACK.MSA
+    }
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<hl7:write doc:name="Write" doc:id="9b6c5ea8-00f5-4766-9f46-6805ce262172" config-ref="HL7_EDI_Config"/>
+		<logger level="INFO" doc:name="ACK" doc:id="760f341c-3b5d-4f5d-ae6f-0ee926ec8e7e" message="ACK: #[payload]" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="817bbd3c-b7b4-4649-9568-81c66836decc" type="ANY">
+				<ee:transform doc:name="ACK Error" doc:id="96fe964c-ac29-4491-84b5-696c6e08efda" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[{
+  "Errors": [
+    {
+      "errorType": {
+        
+      },
+      "errorCode": "101",
+      "fatal": false,
+      "errorText": "error.cause.message default error.errorMessage",
+      "segment": 1
+    }
+  ],
+  "Delimiters": "|^~\\&",
+  "Id": "ACK",
+  "Name": "ACK",
+  "MSH": {
+    "MSH-10": "3101",
+    "MSH-11": {
+      "PT-01": "T"
+    },
+    "MSH-12": {
+      "VID-01": "2.5"
+    },
+    "MSH-03": {
+      "HD-01": "PATHOX"
+    },
+    "MSH-04": {
+      "HD-01": "TESI"
+    },
+    "MSH-05": {
+      "HD-01": "TASY"
+    },
+    "MSH-06": {
+      "HD-01": "PHILIPS"
+    },
+    "MSH-07": {
+      "TS-01": "20160826171359.753-0300"
+    },
+    "MSH-09": {
+      "MSG-03": "ACK",
+      "MSG-02": "R01",
+      "MSG-01": "ACK"
+    }
+  },
+  "ACK": {
+    "MSA": {
+      "MSA-02": "3101",
+      "MSA-01": "AE"
+    },
+    "MSH": {
+      "MSH-10": "3101",
+      "MSH-11": {
+        "PT-01": "T"
+      },
+      "MSH-12": {
+        "VID-01": "2.5"
+      },
+      "MSH-03": {
+        "HD-01": "PATHOX"
+      },
+      "MSH-04": {
+        "HD-01": "TESI"
+      },
+      "MSH-05": {
+        "HD-01": "TASY"
+      },
+      "MSH-06": {
+        "HD-01": "PHILIPS"
+      },
+      "MSH-07": {
+        "TS-01": "20160826171359.753-0300"
+      },
+      "MSH-09": {
+        "MSG-03": "ACK",
+        "MSG-02": "R01",
+        "MSG-01": "ACK"
+      }
+    },
+    "ERR": [
+      {
+        "ERR-01": [
+          {
+            "ELD-04": {
+              "CE-01": "101",
+              "CE-02": "error.cause.message default error.errorMessage",
+              "CE-03": "HL70357"
+            },
+            "ELD-01": "MSH",
+            "ELD-02": 1,
+            "ELD-03": 9
+          }
+        ]
+      }
+    ]
+  },
+  "Data": {
+    "ACK": {
+      "MSH": {
+        "MSH-10": "3101",
+        "MSH-11": {
+          "PT-01": "T"
+        },
+        "MSH-12": {
+          "VID-01": "2.5"
+        },
+        "MSH-03": {
+          "HD-01": "PATHOX"
+        },
+        "MSH-04": {
+          "HD-01": "TESI"
+        },
+        "MSH-05": {
+          "HD-01": "TASY"
+        },
+        "MSH-06": {
+          "HD-01": "PHILIPS"
+        },
+        "MSH-07": {
+          "TS-01": "20160826171359.753-0300"
+        },
+        "MSH-09": {
+          "MSG-03": "ACK",
+          "MSG-02": "R01",
+          "MSG-01": "ACK"
+        }
+      },
+      "MSA": {
+        "MSA-02": "3101",
+        "MSA-01": "AE"
+      }
+    }
+  }
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<hl7:write doc:name="Write" doc:id="973e5ae5-5f48-410e-9d51-2f377b15bac2" config-ref="HL7_EDI_Config" />
+				<logger level="INFO" doc:name="ACK" doc:id="a146b5f5-461c-4334-8396-43771e2bd3d4" message="ACK: #[payload]" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

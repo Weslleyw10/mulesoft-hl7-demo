@@ -1,1 +1,9 @@
-ADT: { ADT: ADT_A01, ACK: ACK }
+# R01 is the Trigger Event (MSH-9-2) for an ORU message
+R01:
+  ORU: ORU_R01
+  ACK: ACK
+
+# A01 is the Trigger Event (MSH-9-2) for an ADT message
+A01:
+  ADT: ADT_A01
+  ACK: ACK

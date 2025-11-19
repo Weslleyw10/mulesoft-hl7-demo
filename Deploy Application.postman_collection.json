@@ -1,0 +1,334 @@
+{
+	"info": {
+		"_postman_id": "e8997c6b-db88-4021-86ae-9beb7aa9548d",
+		"name": "Deploy Application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12089282"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://anypoint.mulesoft.com/accounts/api/v2/oauth2/token",
+					"protocol": "https",
+					"host": [
+						"anypoint",
+						"mulesoft",
+						"com"
+					],
+					"path": [
+						"accounts",
+						"api",
+						"v2",
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Publish Asset",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json, text/plain, */*"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer 43be0557-61c3-4d86-a287-77e49a3ef090"
+					},
+					{
+						"key": "X-ANYPNT-ENV-ID",
+						"value": ""
+					},
+					{
+						"key": "X-ANYPNT-ORG-ID",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "files.mule-application.jar",
+							"type": "file",
+							"src": []
+						},
+						{
+							"key": "files.pom",
+							"type": "file",
+							"src": "/C:/Mulesoft/Workspaces/oncoclinicas/mulesoft-oncoclinicas-papi-pathox/papi-pathox/pom.xml"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://anypoint.mulesoft.com/exchange/api/v2/organizations/:orgId/assets/:groupId/:artifactId/:version",
+					"protocol": "https",
+					"host": [
+						"anypoint",
+						"mulesoft",
+						"com"
+					],
+					"path": [
+						"exchange",
+						"api",
+						"v2",
+						"organizations",
+						":orgId",
+						"assets",
+						":groupId",
+						":artifactId",
+						":version"
+					],
+					"variable": [
+						{
+							"key": "orgId",
+							"value": ""
+						},
+						{
+							"key": "groupId",
+							"value": ""
+						},
+						{
+							"key": "artifactId",
+							"value": ""
+						},
+						{
+							"key": "version",
+							"value": "1.0.2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deploy Application",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-ANYPNT-ENV-ID",
+						"value": ""
+					},
+					{
+						"key": "X-ANYPNT-ORG-ID",
+						"value": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=UTF-8"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer 30b13d35-1ac2-484b-8055-19ac3a26ea5f"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"hl7-demo\",\n    \"labels\": [\n        \"beta\"\n    ],\n    \"target\": {\n        \"provider\": \"MC\",\n        \"targetId\": \"3ced3fa1-4423-4b22-9671-b953ad792d0f\",\n        \"deploymentSettings\": {\n            \"clustered\": false,\n            \"enforceDeployingReplicasAcrossNodes\": false,\n            \"http\": {\n                \"inbound\": {\n                    \"publicUrl\": null,\n                    \"pathRewrite\": null,\n                    \"lastMileSecurity\": false,\n                    \"forwardSslSession\": false\n                }\n            },\n            \"tcp\": {\n                \"inbound\": {\n                    \"ports\": [\n                        {\n                            \"portNumber\": 30500,\n                            \"applicationPortNumber\": 30500\n                        }\n                    ]\n                }\n            },\n            \"jvm\": {},\n            \"runtimeVersion\": \"4.9.8\",\n            \"updateStrategy\": \"rolling\",\n            \"disableAmLogForwarding\": false,\n            \"persistentObjectStore\": false,\n            \"generateDefaultPublicUrl\": false\n        },\n        \"replicas\": 1\n    },\n    \"application\": {\n        \"ref\": {\n            \"groupId\": \"c086ad35-c2e1-4ab0-8e2e-acd6dbdf0d61\",\n            \"artifactId\": \"hl7-demo-app2\",\n            \"version\": \"1.0.2\",\n            \"packaging\": \"jar\"\n        },\n        \"assets\": [],\n        \"desiredState\": \"STARTED\",\n        \"configuration\": {\n            \"mule.agent.application.properties.service\": {\n                \"applicationName\": \"hl7-demo\",\n                \"properties\": {},\n                \"secureProperties\": {}\n            },\n            \"mule.agent.logging.service\": {\n                \"scopeLoggingConfigurations\": []\n            }\n        },\n        \"integrations\": {\n            \"services\": {\n                \"objectStoreV2\": {\n                    \"enabled\": true\n                }\n            }\n        },\n        \"vCores\": \"0.1\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://anypoint.mulesoft.com/amc/application-manager/api/v2/organizations/:orgID/environments/:envID/deployments",
+					"protocol": "https",
+					"host": [
+						"anypoint",
+						"mulesoft",
+						"com"
+					],
+					"path": [
+						"amc",
+						"application-manager",
+						"api",
+						"v2",
+						"organizations",
+						":orgID",
+						"environments",
+						":envID",
+						"deployments"
+					],
+					"variable": [
+						{
+							"key": "orgID",
+							"value": ""
+						},
+						{
+							"key": "envID",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Environments",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer 30b13d35-1ac2-484b-8055-19ac3a26ea5f"
+					}
+				],
+				"url": {
+					"raw": "https://anypoint.mulesoft.com/accounts/api/organizations/:orgId/environments",
+					"protocol": "https",
+					"host": [
+						"anypoint",
+						"mulesoft",
+						"com"
+					],
+					"path": [
+						"accounts",
+						"api",
+						"organizations",
+						":orgId",
+						"environments"
+					],
+					"variable": [
+						{
+							"key": "orgId",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Available Ports",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer e2f8725f-b423-40c9-ac69-a631f5bdac99",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://anypoint.mulesoft.com/runtimefabric/api/organizations/:orgId/privatespaces/:privatespaceId/ports?available=true&count=10",
+					"protocol": "https",
+					"host": [
+						"anypoint",
+						"mulesoft",
+						"com"
+					],
+					"path": [
+						"runtimefabric",
+						"api",
+						"organizations",
+						":orgId",
+						"privatespaces",
+						":privatespaceId",
+						"ports"
+					],
+					"query": [
+						{
+							"key": "available",
+							"value": "true"
+						},
+						{
+							"key": "count",
+							"value": "10"
+						}
+					],
+					"variable": [
+						{
+							"key": "orgId",
+							"value": ""
+						},
+						{
+							"key": "privatespaceId",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Asset",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer 43be0557-61c3-4d86-a287-77e49a3ef090",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://anypoint.mulesoft.com/exchange/api/v2/organizations/c086ad35-c2e1-4ab0-8e2e-acd6dbdf0d61/assets/c086ad35-c2e1-4ab0-8e2e-acd6dbdf0d61/hl7-demo-app2/1.0.2/publication/status/330d069a-607d-4cea-8aff-4a21b89e15dd",
+					"protocol": "https",
+					"host": [
+						"anypoint",
+						"mulesoft",
+						"com"
+					],
+					"path": [
+						"exchange",
+						"api",
+						"v2",
+						"organizations",
+						"c086ad35-c2e1-4ab0-8e2e-acd6dbdf0d61",
+						"assets",
+						"c086ad35-c2e1-4ab0-8e2e-acd6dbdf0d61",
+						"hl7-demo-app2",
+						"1.0.2",
+						"publication",
+						"status",
+						"330d069a-607d-4cea-8aff-4a21b89e15dd"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
